@@ -19,6 +19,7 @@ import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CircleIcon from '@mui/icons-material/Circle';
+import { useAuth } from '../../context/AuthContext';
 
 interface SidebarProps {
   open?: boolean;
@@ -26,6 +27,7 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
   const drawerWidth = 240;
+  const { currentUser, logout } = useAuth();
 
   const menuItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', active: true },
@@ -102,7 +104,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
             <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Log Out" />
+            <ListItemText primary="Log Out" onClick={logout}/>
           </ListItemButton>
         </ListItem>
       </Box>
