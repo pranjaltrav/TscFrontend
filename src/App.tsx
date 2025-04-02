@@ -7,6 +7,7 @@ import AdminDashboard from './pages/admin/AdminDashboard';
 import DealerDashboard from './pages/dealer/DealerDashboard';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import DashboardMain from './pages/dashboard/DashboardMain';
 
 // Create a theme instance for your application
 const theme = createTheme({
@@ -40,6 +41,11 @@ function App() {
                 <AdminDashboard />
               </PrivateRoute>
             } />
+            <Route path="/dashboard" element={
+            <PrivateRoute allowedRoles={['admin']}>
+              <DashboardMain />
+            </PrivateRoute>
+          } />
             <Route path="/dealer/dashboard" element={
               <PrivateRoute allowedRoles={['dealer']}>
                 <DealerDashboard />
