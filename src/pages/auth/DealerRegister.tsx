@@ -15,13 +15,12 @@ import {
 } from '@mui/material';
 import { Google, Facebook, GitHub, LinkedIn } from '@mui/icons-material';
 
-const AdminRegister: React.FC = () => {
+const DealerRegister: React.FC = () => {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
-  const [phone, setPhone] = useState(''); // Added phone field to match dealer registration
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [adminCode, setAdminCode] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
@@ -31,7 +30,7 @@ const AdminRegister: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!name || !email || !phone || !password || !confirmPassword || !adminCode) {
+    if (!name || !email || !phone || !password || !confirmPassword) {
       setError('All fields are required');
       return;
     }
@@ -45,9 +44,9 @@ const AdminRegister: React.FC = () => {
     setError('');
     
     try {
-      // Updated to match DealerRegister pattern - passing phone and using 'admin' role
-      await register(name, email, phone, password, 'admin');
-      navigate('/admin/dashboard');
+      // Use the updated register function from AuthContext
+      await register(name, email, phone, password, 'dealer');
+      navigate('/dealer/dashboard');
     } catch (err: any) {
       setError(err.message || 'Registration failed. Please try again.');
     } finally {
@@ -62,7 +61,7 @@ const AdminRegister: React.FC = () => {
         <Box
           sx={{
             width: '40%',
-            backgroundColor: 'primary.dark', // Darker shade for admin
+            backgroundColor: 'primary.main',
             color: 'white',
             display: 'flex',
             flexDirection: 'column',
@@ -73,17 +72,17 @@ const AdminRegister: React.FC = () => {
           }}
         >
           <Typography variant="h5" fontWeight="bold" align="center">
-            Admin Registration
+            Dealer Registration
           </Typography>
           <Typography variant="body1" align="center" sx={{ mt: 2 }}>
-            Register as an administrator to manage system configuration and user accounts.
+            Register as a dealer to access exclusive tools and loan management features.
           </Typography>
         </Box>
 
         {/* Right Section - Registration Form */}
         <Box sx={{ width: '60%', p: 4 }}>
           <Typography component="h1" variant="h5" sx={{ fontWeight: 'bold', textAlign: 'center' }}>
-            Create Admin Account
+            Create Dealer Account
           </Typography>
 
           {error && (
@@ -98,7 +97,7 @@ const AdminRegister: React.FC = () => {
               required
               fullWidth
               id="name"
-              label="Full Name"
+              label="Username"
               autoComplete="name"
               autoFocus
               size="small"
@@ -151,27 +150,15 @@ const AdminRegister: React.FC = () => {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
             />
-            {/* <TextField
-              margin="dense"
-              required
-              fullWidth
-              label="Admin Registration Code"
-              type="password"
-              id="adminCode"
-              size="small"
-              value={adminCode}
-              onChange={(e) => setAdminCode(e.target.value)}
-            /> */}
 
             <Button
               type="submit"
               fullWidth
               variant="contained"
               disabled={isLoading}
-              color="secondary" // Different color for admin
               sx={{ mt: 3, mb: 2 }}
             >
-              {isLoading ? <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} /> : 'Register as Admin'}
+              {isLoading ? <CircularProgress size={20} sx={{ mr: 1, color: 'white' }} /> : 'Register as Dealer'}
             </Button>
 
             <Divider sx={{ my: 2 }}>OR</Divider>
@@ -196,9 +183,9 @@ const AdminRegister: React.FC = () => {
             </Box>
             
             <Box sx={{ textAlign: 'center', mt: 1 }}>
-              <Link to="/dealer/register" style={{ textDecoration: 'none' }}>
+              <Link to="/admin/register" style={{ textDecoration: 'none' }}>
                 <Typography variant="body2" color="text.secondary">
-                  Register as Dealer instead
+                  Register as Admin instead
                 </Typography>
               </Link>
             </Box>
@@ -209,4 +196,4 @@ const AdminRegister: React.FC = () => {
   );
 };
 
-export default AdminRegister;
+export default DealerRegister;

@@ -14,7 +14,7 @@ interface AuthContextType {
   currentUser: User | null;
   isLoading: boolean;
   login: (email: string, password: string, role: UserRole) => Promise<void>;
-  register: (name: string, email: string, password: string, role: UserRole) => Promise<void>;
+  register: (name: string, email: string, phoneNumber: string, password: string, role: UserRole) => Promise<void>;
   logout: () => void;
 }
 
@@ -32,8 +32,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7120';
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -51,9 +50,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Accept: 'text/plain',
+          'Accept': 'text/plain',
         },
-        body: JSON.stringify({ username: email, password }),
+        body: JSON.stringify({ username: email, password, userType: role, }),
       });
   
       if (!response.ok) {
@@ -68,8 +67,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
   
-        // Redirect to admin dashboard
-        window.location.href = '/admin/dashboard';
+        // Redirect to appropriate dashboard based on role
+        window.location.href = role === 'admin' ? '/admin/dashboard' : '/dealer/dashboard';
       } else {
         throw new Error('Invalid credentials');
       }
@@ -81,34 +80,44 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-
-  // Register Function with API Integration
-  const register = async (name: string, email: string, password: string, role: UserRole) => {
+  // Updated Register Function with API Integration
+  const register = async (name: string, email: string, phoneNumber: string, password: string, role: UserRole) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`${API_BASE_URL}/api/Auth/register`, {
+      const response = await fetch(`/api/Auth/register`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Accept': 'text/plain',
         },
-        body: JSON.stringify({ name, email, password, role }),
+        body: JSON.stringify({
+          username: name,
+          email: email,
+          phoneNumber: phoneNumber,
+          password: password,
+          userType: role // API expects 'userType' instead of 'role'
+        }),
       });
 
       if (!response.ok) {
-        throw new Error('Registration failed');
+        const errorText = await response.text();
+        throw new Error(errorText || 'Registration failed');
       }
 
       const data = await response.json();
 
+      // Map API response to User interface
       const user: User = {
-        id: data.id.toString(),
-        name: data.name,
-        email: data.email,
-        role: data.role as UserRole,
+        id: data.id?.toString() || '1',
+        name: data.username || name,
+        email: data.email || email,
+        role: role
       };
 
       localStorage.setItem('user', JSON.stringify(user));
       setCurrentUser(user);
+      
+      return; // Allow component to handle navigation
     } catch (error) {
       console.error('Registration error:', error);
       throw error;

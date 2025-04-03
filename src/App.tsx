@@ -3,6 +3,7 @@ import { AuthProvider } from './context/AuthContext';
 import PrivateRoute from './components/PrivateRoute';
 import Login from './pages/auth/Login';
 import Register from './pages/auth/Register';
+import DealerRegister from './pages/auth/DealerRegister';
 import AdminDashboard from './pages/admin/AdminDashboard';
 import DealerDashboard from './pages/dealer/DealerDashboard';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -35,7 +36,8 @@ function App() {
         <Router>
           <Routes>
             <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route path="/admin/register" element={<Register />} />
+            <Route path="/dealer/register" element={<DealerRegister />} />
             <Route path="/admin/dashboard" element={
               <PrivateRoute allowedRoles={['admin']}>
                 <AdminDashboard />
