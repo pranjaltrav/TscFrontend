@@ -1,4 +1,7 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
+import DealerOnboardingDialog from "../../components/dealer/DealerOnboardingDialog";
+import { DealerService } from "../../service/DealerService";
+
 import { useAuth } from "../../context/AuthContext";
 import {
   Typography,
@@ -205,6 +208,38 @@ const DealerDashboard: React.FC = () => {
   const [tabValue, setTabValue] = useState('overview');
   const [selectedVehicleId, setSelectedVehicleId] = useState<string | null>(null);
 
+  const [onboardingDialogOpen, setOnboardingDialogOpen] = useState(false);
+  const [isOnboarded, setIsOnboarded] = useState<boolean | null>(null);
+  const [isCheckingOnboarding, setIsCheckingOnboarding] = useState(true);
+
+  useEffect(() => {
+    if (currentUser?.id) {
+      checkOnboardingStatus();
+    }
+  }, [currentUser]);
+
+  const checkOnboardingStatus = async () => {
+    if (!currentUser?.id) return;
+    
+    setIsCheckingOnboarding(true);
+    try {
+      const status = await DealerService.getDealerOnboardingStatus(currentUser.id);
+      setIsOnboarded(!!status?.id);
+    } catch (error) {
+      console.error("Error checking onboarding status:", error);
+      setIsOnboarded(false);
+    } finally {
+      setIsCheckingOnboarding(false);
+    }
+  };
+  
+  // Add this function to handle onboarding success
+  const handleOnboardingSuccess = () => {
+    setIsOnboarded(true);
+    // Optionally refresh data or show a notification
+  };
+  
+
   const handleTabChange = (_event: React.SyntheticEvent, newValue: string) => {
     setTabValue(newValue);
   };
@@ -220,12 +255,31 @@ const DealerDashboard: React.FC = () => {
   
   return (
     <MainLayout>
-      <Box sx={{ mb: 3 }}>
-        <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Dealer Dashboard</Typography>
-        <Typography variant="subtitle1" color="text.secondary">
-          Welcome, {currentUser?.name || 'Dealer'}
-        </Typography>
+      <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box>
+          <Typography variant="h5" sx={{ fontWeight: 'bold' }}>Dealer Dashboard</Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Welcome, {currentUser?.name || 'Dealer'}
+          </Typography>
+        </Box>
+
+        {!isCheckingOnboarding && !isOnboarded && (
+          <Button
+            variant="contained"
+            color="primary"
+            sx={{
+              bgcolor: '#1e3a8a',
+              '&:hover': { bgcolor: '#15296b' },
+              borderRadius: 1.5,
+              boxShadow: '0 4px 6px rgba(0,0,0,0.1)'
+            }}
+            onClick={() => setOnboardingDialogOpen(true)}
+          >
+            Complete Onboarding
+          </Button>
+        )}
       </Box>
+      
 
       <Paper sx={{ borderRadius: 2, mb: 3 }}>
         <Tabs
@@ -651,8 +705,14 @@ const DealerDashboard: React.FC = () => {
           <BarChart color="#1e3a8a" />
         </CardContent>
       </Card>
+      <DealerOnboardingDialog
+        open={onboardingDialogOpen}
+        onClose={() => setOnboardingDialogOpen(false)}
+        onSuccess={handleOnboardingSuccess}
+      />
     </MainLayout>
   );
+  
 };
 
 export default DealerDashboard;

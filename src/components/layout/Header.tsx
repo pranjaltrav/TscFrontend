@@ -9,14 +9,18 @@ import {
   Box 
 } from '@mui/material';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { useAuth } from '../../context/AuthContext'; // Import useAuth hook
 
 const Header: React.FC = () => {
+  const { currentUser } = useAuth(); // Get the current user from AuthContext
+
   return (
     <AppBar position="static" color="default" elevation={0} sx={{ bgcolor: 'white', borderBottom: '1px solid #e0e0e0' }}>
       <Toolbar sx={{ display: 'flex', justifyContent: 'space-between' }}>
-        <Box sx={{ visibility: 'hidden' }}>
-          {/* Placeholder to balance the layout */}
-          <Typography variant="h6">TSC</Typography>
+        <Box>
+          <Typography variant="h6" sx={{ color: '#1e3a8a', fontWeight: 'bold' }}>
+            TSC
+          </Typography>
         </Box>
         
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
@@ -30,16 +34,16 @@ const Header: React.FC = () => {
           
           <Box sx={{ display: 'flex', alignItems: 'center' }}>
             <Avatar 
-              alt="John Smith" 
+              alt={currentUser?.name || "User"} 
               src="/avatar-placeholder.jpg" 
-              sx={{ width: 36, height: 36, bgcolor: 'primary.main' }}
+              sx={{ width: 36, height: 36, bgcolor: '#1e3a8a' }}
             />
             <Box sx={{ ml: 1 }}>
               <Typography variant="subtitle1" sx={{ fontWeight: 500 }}>
-                John Smith
+                {currentUser?.name || "John Smith"}
               </Typography>
               <Typography variant="caption" color="textSecondary">
-                john@gmail.com
+                {currentUser?.email || "john@gmail.com"}
               </Typography>
             </Box>
           </Box>
