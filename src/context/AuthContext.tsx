@@ -1,4 +1,5 @@
 import React, { createContext, useState, useEffect, useContext } from 'react';
+import axios from 'axios';
 
 // Define user role types
 export type UserRole = 'admin' | 'dealer';
@@ -32,7 +33,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7120';
+  // Configure axios defaults - using relative URLs instead of absolute
+  const api = axios.create({
+    headers: {
+      'Content-Type': 'application/json',
+      'Accept': 'text/plain'
+    }
+  });
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -42,27 +49,18 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  // Login Function with API Integration
+  // Login Function with Axios Integration using relative URL
   const login = async (email: string, password: string, role: UserRole) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/Auth/login`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/plain',
-        },
-        body: JSON.stringify({ username: email, password, userType: role, }),
+      const response = await api.post('/api/Auth/login', {
+        username: email,
+        password,
+        userType: role,
       });
   
-      if (!response.ok) {
-        throw new Error('Invalid credentials');
-      }
-  
-      const isAuthenticated = await response.json();
-  
-      if (isAuthenticated) {
-        // Set user details in localStorage (if necessary)
+      if (response.data) {
+        // Set user details in localStorage
         const user: User = { id: '1', name: email, email, role }; 
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
@@ -80,37 +78,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // Updated Register Function with API Integration
+  // Updated Register Function with Axios Integration using relative URL
   const register = async (name: string, email: string, phoneNumber: string, password: string, role: UserRole) => {
     setIsLoading(true);
     try {
-      const response = await fetch(`/api/Auth/register`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/plain',
-        },
-        body: JSON.stringify({
-          username: name,
-          email: email,
-          phoneNumber: phoneNumber,
-          password: password,
-          userType: role // API expects 'userType' instead of 'role'
-        }),
+      const response = await api.post('/api/Auth/register', {
+        username: name,
+        email: email,
+        phoneNumber: phoneNumber,
+        password: password,
+        userType: role
       });
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(errorText || 'Registration failed');
-      }
-
-      const data = await response.json();
 
       // Map API response to User interface
       const user: User = {
-        id: data.id?.toString() || '1',
-        name: data.username || name,
-        email: data.email || email,
+        id: response.data.id?.toString() || '1',
+        name: response.data.username || name,
+        email: response.data.email || email,
         role: role
       };
 
