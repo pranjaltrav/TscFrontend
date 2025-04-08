@@ -9,6 +9,7 @@ export interface User {
   name: string;
   email: string;
   role: UserRole;
+  token?: string;
 }
 
 interface AuthContextType {
@@ -33,13 +34,29 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [currentUser, setCurrentUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // Configure axios defaults - using relative URLs instead of absolute
+  // Configure axios defaults
   const api = axios.create({
     headers: {
       'Content-Type': 'application/json',
       'Accept': 'text/plain'
     }
   });
+
+  // Add axios interceptor to include token in all subsequent requests
+  api.interceptors.request.use(
+    (config) => {
+      const user = localStorage.getItem('user');
+      if (user) {
+        const { token } = JSON.parse(user);
+        // console.log(token);
+        if (token && config.headers) {
+          config.headers['Authorization'] = `Bearer ${token}`;
+        }
+      }
+      return config;
+    },
+    (error) => Promise.reject(error)
+  );
 
   useEffect(() => {
     const storedUser = localStorage.getItem('user');
@@ -49,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     setIsLoading(false);
   }, []);
 
-  // Login Function with Axios Integration using relative URL
+  // Login Function with Axios Integration
   const login = async (email: string, password: string, role: UserRole) => {
     setIsLoading(true);
     try {
@@ -60,8 +77,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
   
       if (response.data) {
+        // Map API response to User interface
+        const userData = response.data;
+        const user: User = { 
+          id: userData.id.toString(),
+          name: userData.username,
+          email: userData.email,
+          role: userData.userType,
+          token: userData.token // Save token in user object
+        };
+        
         // Set user details in localStorage
-        const user: User = { id: '1', name: email, email, role }; 
         localStorage.setItem('user', JSON.stringify(user));
         setCurrentUser(user);
   
@@ -78,7 +104,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   };
   
-  // Updated Register Function with Axios Integration using relative URL
+  // Updated Register Function with Axios Integration
   const register = async (name: string, email: string, phoneNumber: string, password: string, role: UserRole) => {
     setIsLoading(true);
     try {
@@ -91,11 +117,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       // Map API response to User interface
+      const userData = response.data;
       const user: User = {
-        id: response.data.id?.toString() || '1',
-        name: response.data.username || name,
-        email: response.data.email || email,
-        role: role
+        id: userData.id.toString(),
+        name: userData.username,
+        email: userData.email,
+        role: userData.userType,
+        token: userData.token // Save token in user object if returned from register API
       };
 
       localStorage.setItem('user', JSON.stringify(user));
@@ -114,6 +142,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const logout = () => {
     localStorage.removeItem('user');
     setCurrentUser(null);
+    // Redirect to login page
+    window.location.href = '/login';
   };
 
   const value = {

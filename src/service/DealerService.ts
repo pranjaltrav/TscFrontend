@@ -2,7 +2,8 @@ import axios from 'axios';
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://localhost:7120';
 
-interface DealerOnboardingData {
+export interface DealerOnboardingData {
+  id: number;
   dealerCode: string;
   loanProposalNo: string;
   name: string;
@@ -35,6 +36,9 @@ interface DealerOnboardingData {
   userId: number;
 }
 
+// Using the same interface for consistency
+export type Dealer = DealerOnboardingData;
+
 export const DealerService = {
   /**
    * Create a new dealer onboarding record
@@ -65,20 +69,90 @@ export const DealerService = {
    * @param userId The user ID to check onboarding status for
    * @returns Promise with the dealer onboarding data if exists
    */
-  getDealerOnboardingStatus: async (userId: string): Promise<any> => {
+  // getDealerOnboardingStatus: async (userId: string): Promise<any> => {
+  //   try {
+  //     const response = await axios.get(
+  //       `${API_BASE_URL}/api/Dealer/onboarding/${userId}`,
+  //       {
+  //         headers: {
+  //           'Accept': 'application/json'
+  //         }
+  //       }
+  //     );
+  //     return response.data;
+  //   } catch (error) {
+  //     console.error('Error fetching dealer onboarding status:', error);
+  //     throw error;
+  //   }
+  // },
+
+  /**
+   * Get all dealers from the API
+   * @returns Promise with array of dealer data
+   */
+  getAllDealers: async (): Promise<Dealer[]> => {
     try {
       const response = await axios.get(
-        `${API_BASE_URL}/api/Dealer/onboarding/${userId}`,
+        `/api/Dealers`,
         {
           headers: {
-            'Accept': 'application/json'
+            'Accept': 'text/plain'
           }
         }
       );
       return response.data;
     } catch (error) {
-      console.error('Error fetching dealer onboarding status:', error);
+      console.error('Error fetching all dealers:', error);
+      throw error;
+    }
+  },
+
+  /**
+   * Get a specific dealer by ID
+   * @param id The dealer ID to fetch
+   * @returns Promise with the dealer data
+   */
+  getDealerById: async (id: number): Promise<Dealer> => {
+    try {
+      const response = await axios.get(
+        `/api/Dealers/${id}`,
+        {
+          headers: {
+            'Accept': 'text/plain'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error fetching dealer with ID ${id}:`, error);
+      throw error;
+    }
+  },
+
+  /**
+   * Update an existing dealer
+   * @param id The dealer ID to update
+   * @param dealerData The updated dealer data
+   * @returns Promise with the updated dealer data
+   */
+  updateDealer: async (id: number, dealerData: Partial<DealerOnboardingData>): Promise<Dealer> => {
+    try {
+      const response = await axios.put(
+        `${API_BASE_URL}/api/Dealers/${id}`,
+        dealerData,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'Accept': 'text/plain'
+          }
+        }
+      );
+      return response.data;
+    } catch (error) {
+      console.error(`Error updating dealer with ID ${id}:`, error);
       throw error;
     }
   }
 };
+
+export default DealerService;

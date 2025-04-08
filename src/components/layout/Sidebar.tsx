@@ -20,6 +20,7 @@ import FormatListBulletedIcon from '@mui/icons-material/FormatListBulleted';
 import LogoutIcon from '@mui/icons-material/Logout';
 import CircleIcon from '@mui/icons-material/Circle';
 import { useAuth } from '../../context/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 interface SidebarProps {
   open?: boolean;
@@ -28,16 +29,35 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
   const drawerWidth = 240;
   const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const menuItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', active: true },
-    { text: 'Dealer Master', icon: <PeopleIcon />, path: '/dealer-master' },
+  if (!currentUser) return null;
+
+  const handleLogout = () => {
+    logout();
+    navigate('/login');
+  };
+
+  // Menu for admin
+  const adminMenu = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Dealer Master', icon: <PeopleIcon />, path: '/dealer-listing' },
     { text: 'Loan Master', icon: <AccountBalanceIcon />, path: '/loan-master' },
     { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
     { text: 'User Access', icon: <SecurityIcon />, path: '/user-access' },
     { text: 'User Roles', icon: <AdminPanelSettingsIcon />, path: '/user-roles' },
     { text: 'Followup Items', icon: <FormatListBulletedIcon />, path: '/followup-items' },
   ];
+
+  // Menu for dealer
+  const dealerMenu = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dealer/dashboard' },
+    { text: 'Loans', icon: <AccountBalanceIcon />, path: '/dealer/loans' },
+    { text: 'Reports', icon: <AssessmentIcon />, path: '/dealer/reports' },
+    { text: 'Wallet', icon: <AccountBalanceIcon />, path: '/dealer/wallet' },
+  ];
+
+  const menuItems = currentUser.role === 'admin' ? adminMenu : dealerMenu;
 
   return (
     <Drawer
@@ -48,23 +68,23 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
         '& .MuiDrawer-paper': {
           width: drawerWidth,
           boxSizing: 'border-box',
-          bgcolor: '#1e3a8a', // Purple color as in the image
+          bgcolor: '#1e3a8a',
           color: 'white',
-          borderRadius: '0 50px 50px 0px'
+          borderRadius: '0 50px 50px 0px',
         },
       }}
     >
       <Box sx={{ p: 2, display: 'flex', alignItems: 'center', justifyContent: 'flex-start' }}>
-        <Box 
-          sx={{ 
-            bgcolor: 'white', 
-            borderRadius: '50%', 
-            width: 40, 
-            height: 40, 
-            display: 'flex', 
-            alignItems: 'center', 
+        <Box
+          sx={{
+            bgcolor: 'white',
+            borderRadius: '50%',
+            width: 40,
+            height: 40,
+            display: 'flex',
+            alignItems: 'center',
             justifyContent: 'center',
-            mr: 2
+            mr: 2,
           }}
         >
           <CircleIcon sx={{ color: '#1e3a8a', fontSize: 30 }} />
@@ -73,38 +93,36 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
           Circle
         </Typography>
       </Box>
-      
+
       <Divider sx={{ bgcolor: 'rgba(255,255,255,0.1)' }} />
-      
+
       <List sx={{ pt: 2 }}>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
-            <ListItemButton 
-              sx={{ 
-                borderRadius: '8px', 
+            <ListItemButton
+              sx={{
+                borderRadius: '8px',
                 m: 0.5,
-                bgcolor: item.active ? 'rgba(255,255,255,0.1)' : 'transparent',
                 '&:hover': {
                   bgcolor: 'rgba(255,255,255,0.1)',
-                }
+                },
               }}
+              onClick={() => navigate(item.path)}
             >
-              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
-                {item.icon}
-              </ListItemIcon>
+              <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
             </ListItemButton>
           </ListItem>
         ))}
       </List>
-      
+
       <Box sx={{ mt: 'auto', p: 2 }}>
         <ListItem disablePadding>
-          <ListItemButton>
+          <ListItemButton onClick={handleLogout}>
             <ListItemIcon sx={{ color: 'white', minWidth: 40 }}>
               <LogoutIcon />
             </ListItemIcon>
-            <ListItemText primary="Log Out" onClick={logout}/>
+            <ListItemText primary="Log Out" />
           </ListItemButton>
         </ListItem>
       </Box>
