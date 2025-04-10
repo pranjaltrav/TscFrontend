@@ -42,9 +42,9 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
   const adminMenu = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Dealer Master', icon: <PeopleIcon />, path: '/dealer-listing' },
-    { text: 'Loan Master', icon: <AccountBalanceIcon />, path: '/loan-master' },
+    { text: 'Loan Master', icon: <AccountBalanceIcon />, path: '/loan-listing' },
     { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
-    { text: 'User Access', icon: <SecurityIcon />, path: '/user-access' },
+    { text: 'User Master', icon: <SecurityIcon />, path: '/user-listing' },
     { text: 'User Roles', icon: <AdminPanelSettingsIcon />, path: '/user-roles' },
     { text: 'Followup Items', icon: <FormatListBulletedIcon />, path: '/followup-items' },
   ];

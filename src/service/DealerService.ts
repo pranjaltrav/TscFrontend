@@ -138,7 +138,7 @@ export const DealerService = {
   updateDealer: async (id: number, dealerData: Partial<DealerOnboardingData>): Promise<Dealer> => {
     try {
       const response = await axios.put(
-        `${API_BASE_URL}/api/Dealers/${id}`,
+        `/api/Dealers/${id}`,
         dealerData,
         {
           headers: {

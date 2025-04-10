@@ -11,7 +11,8 @@ import CssBaseline from '@mui/material/CssBaseline';
 import DashboardMain from './pages/dashboard/DashboardMain';
 import DealerListing from './pages/admin/DealerListing';
 import DealerDetails from './pages/admin/DealerDetails';
-
+import LoanListing from './pages/admin/LoanListing';
+import RepresentativeListing from './pages/admin/RepresentativeListing';
 // Create a theme instance for your application
 const theme = createTheme({
   palette: {
@@ -58,6 +59,12 @@ function App() {
 
              <Route path="/dealer-listing" element={<PrivateRoute allowedRoles={['admin']}><DealerListing /></PrivateRoute>} />
              <Route path="/dealer-details/:id" element={<PrivateRoute allowedRoles={['admin']}><DealerDetails /></PrivateRoute>} />
+
+             <Route path="/loan-listing" element={<PrivateRoute allowedRoles={['admin']}><LoanListing /></PrivateRoute>} />
+             <Route path="/loan-details/:id" element={<PrivateRoute allowedRoles={['admin']}><DealerDetails /></PrivateRoute>} />
+
+             <Route path="/user-listing" element={<PrivateRoute allowedRoles={['admin']}><RepresentativeListing /></PrivateRoute>} />
+
             <Route path="/" element={<Navigate to="/login" replace />} />
           </Routes>
         </Router>
