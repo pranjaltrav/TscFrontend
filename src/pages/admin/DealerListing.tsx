@@ -254,7 +254,7 @@ const DealerListing: React.FC = () => {
             <CardContent>
               <Typography variant="body2" color="text.secondary">Total Outstanding</Typography>
               <Typography variant="h5" sx={{ mt: 1, fontWeight: 'bold' }}>
-                ${dealers.reduce((sum, dealer) => sum + dealer.outstandingAmount, 0).toLocaleString()}
+                ₹{dealers.reduce((sum, dealer) => sum + dealer.outstandingAmount, 0).toLocaleString()}
               </Typography>
             </CardContent>
           </Card>
@@ -334,8 +334,8 @@ const DealerListing: React.FC = () => {
                             sx={{ fontWeight: 500 }}
                           />
                         </TableCell>
-                        <TableCell>${dealer.outstandingAmount.toLocaleString()}</TableCell>
-                        <TableCell>${dealer.sanctionAmount.toLocaleString()}</TableCell>
+                        <TableCell>₹{dealer.outstandingAmount.toLocaleString()}</TableCell>
+                        <TableCell>₹{dealer.sanctionAmount.toLocaleString()}</TableCell>
                         <TableCell>
                           <Box sx={{ display: 'flex', gap: 1 }}>
                             <Tooltip title="View Details">

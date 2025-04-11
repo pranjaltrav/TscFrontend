@@ -15,16 +15,27 @@ import {
   Alert,
   CircularProgress,
   Divider,
-  Grid
+  Grid,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions
 } from '@mui/material';
 import { Google, Facebook, GitHub, LinkedIn } from '@mui/icons-material';
 
 const Login: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [role, setRole] = useState<UserRole>('dealer');
+  const role: UserRole = 'admin'; // Hardcoded to admin
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  
+  // OTP related state
+  const [otpDialogOpen, setOtpDialogOpen] = useState(false);
+  const [otpMethod, setOtpMethod] = useState('email');
+  const [otp, setOtp] = useState('');
+  const [generatedOtp, setGeneratedOtp] = useState('');
+  const [otpVerificationStep, setOtpVerificationStep] = useState(1); // 1 = choose method, 2 = enter OTP
 
   const { login } = useAuth();
   const navigate = useNavigate();
@@ -41,13 +52,53 @@ const Login: React.FC = () => {
     setError('');
 
     try {
-      await login(email, password, role);
-      navigate(role === 'admin' ? '/admin/dashboard' : '/dealer/dashboard');
+      // Instead of directly logging in, open the OTP dialog
+      setIsLoading(false);
+      openOtpDialog();
     } catch (err) {
-      setError('Invalid login credentials');
-    } finally {
+      setError('Something went wrong');
       setIsLoading(false);
     }
+  };
+
+  const openOtpDialog = () => {
+    setOtpDialogOpen(true);
+    setOtpVerificationStep(1);
+    setOtp('');
+    setOtpMethod('email');
+  };
+
+  const handleSendOtp = () => {
+    // Generate a random 6-digit OTP
+    const randomOtp = Math.floor(100000 + Math.random() * 900000).toString();
+    setGeneratedOtp(randomOtp);
+    
+    // Move to OTP entry step
+    setOtpVerificationStep(2);
+    
+    // Show alert with the OTP (for demonstration)
+    alert(`Your OTP is: ${randomOtp} (sent to your ${otpMethod})`);
+  };
+
+  const handleVerifyOtp = async () => {
+    if (otp === generatedOtp) {
+      setOtpDialogOpen(false);
+      
+      setIsLoading(true);
+      try {
+        await login(email, password, role);
+        navigate(role === 'admin' ? '/admin/dashboard' : '/dealer/dashboard');
+      } catch (err) {
+        setError('Invalid login credentials');
+        setIsLoading(false);
+      }
+    } else {
+      setError('Invalid OTP. Please try again.');
+    }
+  };
+
+  const handleCloseOtpDialog = () => {
+    setOtpDialogOpen(false);
   };
 
   return (
@@ -113,19 +164,6 @@ const Login: React.FC = () => {
               onChange={(e) => setPassword(e.target.value)}
             />
 
-            <Box sx={{ display: 'flex', alignItems: 'center', mt: 2, justifyContent: 'space-between' }}>
-              <Typography component="label" variant="body2">
-                I am a:
-              </Typography>
-
-              <FormControl component="fieldset">
-                <RadioGroup row value={role} onChange={(e) => setRole(e.target.value as UserRole)}>
-                  <FormControlLabel value="dealer" control={<Radio size="small" />} label="Dealer" />
-                  <FormControlLabel value="admin" control={<Radio size="small" />} label="Admin" />
-                </RadioGroup>
-              </FormControl>
-            </Box>
-
             <Button
               type="submit"
               fullWidth
@@ -144,8 +182,7 @@ const Login: React.FC = () => {
 
             <Divider sx={{ my: 2 }}>OR</Divider>
 
-            {/* Social Login Buttons */}
-            <Grid container spacing={1} justifyContent="center">
+            {/* <Grid container spacing={1} justifyContent="center">
               {[Google, Facebook, GitHub, LinkedIn].map((Icon, index) => (
                 <Grid item key={index}>
                   <Button variant="outlined" sx={{ minWidth: 50, p: 1 }}>
@@ -153,7 +190,7 @@ const Login: React.FC = () => {
                   </Button>
                 </Grid>
               ))}
-            </Grid>
+            </Grid> */}
 
             <Box sx={{ textAlign: 'center', mt: 2 }}>
               <Link to="/register" style={{ textDecoration: 'none' }}>
@@ -165,6 +202,57 @@ const Login: React.FC = () => {
           </Box>
         </Box>
       </Paper>
+
+      {/* OTP Verification Dialog */}
+      <Dialog open={otpDialogOpen} onClose={handleCloseOtpDialog}>
+        <DialogTitle>OTP Verification</DialogTitle>
+        <DialogContent>
+          {otpVerificationStep === 1 && (
+            <>
+              <Typography variant="body1" gutterBottom>
+                Please select how you want to receive the OTP:
+              </Typography>
+              <FormControl component="fieldset" sx={{ mt: 2 }}>
+                <RadioGroup 
+                  row 
+                  value={otpMethod} 
+                  onChange={(e) => setOtpMethod(e.target.value)}
+                >
+                  <FormControlLabel value="mobile" control={<Radio />} label="Mobile" />
+                  <FormControlLabel value="email" control={<Radio />} label="Email" />
+                </RadioGroup>
+              </FormControl>
+            </>
+          )}
+          
+          {otpVerificationStep === 2 && (
+            <>
+              <Typography variant="body1" gutterBottom>
+                Enter the OTP sent to your {otpMethod}:
+              </Typography>
+              <TextField
+                margin="dense"
+                required
+                fullWidth
+                id="otp"
+                label="OTP"
+                autoFocus
+                value={otp}
+                onChange={(e) => setOtp(e.target.value)}
+              />
+            </>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={handleCloseOtpDialog}>Cancel</Button>
+          {otpVerificationStep === 1 && (
+            <Button onClick={handleSendOtp}>Send OTP</Button>
+          )}
+          {otpVerificationStep === 2 && (
+            <Button onClick={handleVerifyOtp}>Verify</Button>
+          )}
+        </DialogActions>
+      </Dialog>
     </Container>
   );
 };

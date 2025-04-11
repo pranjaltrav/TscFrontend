@@ -1,32 +1,23 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Grid, 
-  Card, 
-  CardContent, 
-  Chip, 
-  Divider, 
-  Table, 
-  TableBody,
-  TableCell,
-  TableContainer, 
-  TableHead, 
-  TableRow,
-  Button,
-  CircularProgress,
-  Breadcrumbs,
-  Link,
-  Avatar
-} from '@mui/material';
+import { Box, Typography, Paper, Grid, Card, CardContent, Chip, Divider, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Button, CircularProgress, Breadcrumbs, Link, Avatar, IconButton, Tooltip } from '@mui/material';
 import { useParams, useNavigate } from 'react-router-dom';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import ErrorIcon from '@mui/icons-material/Error';
 import AccessTimeIcon from '@mui/icons-material/AccessTime';
+import VisibilityIcon from '@mui/icons-material/Visibility';
+import FileUploadIcon from '@mui/icons-material/FileUpload';
 import MainLayout from '../../components/layout/MainLayout';
 import DealerService, { Dealer } from '../../service/DealerService';
+
+// Define document types interface
+interface DealerDocument {
+  id: number;
+  name: string;
+  type: string;
+  uploadDate: string;
+  status: 'Available' | 'Not Available';
+}
 
 const DealerDetails: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,6 +25,45 @@ const DealerDetails: React.FC = () => {
   const [loading, setLoading] = useState<boolean>(true);
   const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+  
+  // Mock dealer documents data
+  const [documents, setDocuments] = useState<DealerDocument[]>([
+    {
+      id: 1,
+      name: 'PAN Card',
+      type: 'pdf',
+      uploadDate: '2024-03-15',
+      status: 'Available'
+    },
+    {
+      id: 2,
+      name: 'Aadhar Card',
+      type: 'pdf',
+      uploadDate: '2024-03-15',
+      status: 'Available'
+    },
+    {
+      id: 3,
+      name: 'Contract Agreement',
+      type: 'pdf',
+      uploadDate: '2024-03-15',
+      status: 'Available'
+    },
+    {
+      id: 4,
+      name: 'Affidavit',
+      type: 'pdf',
+      uploadDate: '',
+      status: 'Not Available'
+    },
+    {
+      id: 5,
+      name: 'Bank Statement',
+      type: 'pdf',
+      uploadDate: '',
+      status: 'Not Available'
+    }
+  ]);
 
   useEffect(() => {
     const fetchDealerDetails = async () => {
@@ -65,11 +95,24 @@ const DealerDetails: React.FC = () => {
   };
 
   const formatDate = (dateString: string) => {
+    if (!dateString) return 'Not uploaded';
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
+  };
+
+  const handleViewDocument = (documentId: number) => {
+    // In a real application, this would navigate to a document viewer or open the document
+    console.log(`Viewing document with ID: ${documentId}`);
+    alert(`Viewing document ${documentId}. In a real application, this would open the document.`);
+  };
+
+  const handleUploadDocument = (documentId: number) => {
+    // In a real application, this would open a file picker and handle the upload
+    console.log(`Uploading document with ID: ${documentId}`);
+    alert(`Upload interface for document ${documentId}. In a real application, this would open a file picker.`);
   };
 
   if (loading) {
@@ -176,7 +219,7 @@ const DealerDetails: React.FC = () => {
           </Card>
           
           {/* Status Information */}
-          <Card sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+          <Card sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)', mb: 3 }}>
             <CardContent>
               <Typography variant="h6" sx={{ mb: 2 }}>Status Information</Typography>
               
@@ -201,6 +244,76 @@ const DealerDetails: React.FC = () => {
               </Box>
             </CardContent>
           </Card>
+
+          {/* Documents Section */}
+          <Card sx={{ borderRadius: 2, boxShadow: '0 4px 12px rgba(0,0,0,0.05)' }}>
+            <CardContent>
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                <Typography variant="h6">Documents</Typography>
+                <Button 
+                  variant="outlined" 
+                  startIcon={<FileUploadIcon />}
+                  size="small"
+                  onClick={() => alert('In a real application, this would open an upload interface for a new document type.')}
+                >
+                  Add New
+                </Button>
+              </Box>
+              
+              <TableContainer>
+                <Table size="small">
+                  <TableHead sx={{ bgcolor: '#f5f5f5' }}>
+                    <TableRow>
+                      <TableCell>Document Type</TableCell>
+                      <TableCell>Status</TableCell>
+                      <TableCell>Upload Date</TableCell>
+                      <TableCell align="right">Actions</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {documents.map((doc) => (
+                      <TableRow key={doc.id}>
+                        <TableCell>{doc.name}</TableCell>
+                        <TableCell>
+                          <Chip 
+                            label={doc.status} 
+                            size="small" 
+                            color={doc.status === 'Available' ? 'success' : 'default'}
+                            sx={{ fontSize: '0.7rem' }}
+                          />
+                        </TableCell>
+                        <TableCell>{doc.uploadDate ? formatDate(doc.uploadDate) : 'Not uploaded'}</TableCell>
+                        <TableCell align="right">
+                          <Box sx={{ display: 'flex', justifyContent: 'flex-end' }}>
+                            {doc.status === 'Available' && (
+                              <Tooltip title="View Document">
+                                <IconButton 
+                                  size="small" 
+                                  onClick={() => handleViewDocument(doc.id)}
+                                  sx={{ color: '#1e3a8a' }}
+                                >
+                                  <VisibilityIcon fontSize="small" />
+                                </IconButton>
+                              </Tooltip>
+                            )}
+                            <Tooltip title="Upload Document">
+                              <IconButton 
+                                size="small"
+                                onClick={() => handleUploadDocument(doc.id)}
+                                color="primary"
+                              >
+                                <FileUploadIcon fontSize="small" />
+                              </IconButton>
+                            </Tooltip>
+                          </Box>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </TableContainer>
+            </CardContent>
+          </Card>
         </Grid>
         
         {/* Right side - Financial information */}
@@ -213,7 +326,7 @@ const DealerDetails: React.FC = () => {
                 <Box>
                   <Typography variant="body2" color="text.secondary">Sanction Amount</Typography>
                   <Typography variant="h6" sx={{ color: '#1e3a8a' }}>
-                    ${dealer.sanctionAmount.toLocaleString()}
+                  ₹{dealer.sanctionAmount.toLocaleString()}
                   </Typography>
                 </Box>
               </Grid>
@@ -222,7 +335,7 @@ const DealerDetails: React.FC = () => {
                 <Box>
                   <Typography variant="body2" color="text.secondary">Available Limit</Typography>
                   <Typography variant="h6" sx={{ color: 'success.main' }}>
-                    ${dealer.availableLimit.toLocaleString()}
+                  ₹{dealer.availableLimit.toLocaleString()}
                   </Typography>
                 </Box>
               </Grid>
@@ -231,7 +344,7 @@ const DealerDetails: React.FC = () => {
                 <Box>
                   <Typography variant="body2" color="text.secondary">Outstanding Amount</Typography>
                   <Typography variant="h6" sx={{ color: 'warning.main' }}>
-                    ${dealer.outstandingAmount.toLocaleString()}
+                  ₹{dealer.outstandingAmount.toLocaleString()}
                   </Typography>
                 </Box>
               </Grid>
@@ -240,7 +353,7 @@ const DealerDetails: React.FC = () => {
                 <Box>
                   <Typography variant="body2" color="text.secondary">Principal Outstanding</Typography>
                   <Typography variant="h6">
-                    ${dealer.principalOutstanding.toLocaleString()}
+                  ₹{dealer.principalOutstanding.toLocaleString()}
                   </Typography>
                 </Box>
               </Grid>
@@ -305,35 +418,35 @@ const DealerDetails: React.FC = () => {
                 <TableBody>
                   <TableRow>
                     <TableCell sx={{ width: '50%' }}>PF Received</TableCell>
-                    <TableCell>${dealer.pfReceived.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.pfReceived.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Interest Received</TableCell>
-                    <TableCell>${dealer.interestReceived.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.interestReceived.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Delay Interest Received</TableCell>
-                    <TableCell>${dealer.delayInterestReceived.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.delayInterestReceived.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Total Amount Received</TableCell>
-                    <TableCell>${dealer.amountReceived.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.amountReceived.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>PF Accrued</TableCell>
-                    <TableCell>${dealer.pfAcrued.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.pfAcrued.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Interest Accrued</TableCell>
-                    <TableCell>${dealer.interestAccrued.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.interestAccrued.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Delay Interest Accrued</TableCell>
-                    <TableCell>${dealer.delayInterestAccrued.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.delayInterestAccrued.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Waiver Amount</TableCell>
-                    <TableCell>${dealer.waiverAmount.toLocaleString()}</TableCell>
+                    <TableCell>₹{dealer.waiverAmount.toLocaleString()}</TableCell>
                   </TableRow>
                   <TableRow>
                     <TableCell>Overdue Count</TableCell>

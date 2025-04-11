@@ -40,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
 
   // Menu for admin
   const adminMenu = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/admin/dashboard' },
     { text: 'Dealer Master', icon: <PeopleIcon />, path: '/dealer-listing' },
     { text: 'Loan Master', icon: <AccountBalanceIcon />, path: '/loan-listing' },
     { text: 'Reports', icon: <AssessmentIcon />, path: '/reports' },
@@ -90,7 +90,7 @@ const Sidebar: React.FC<SidebarProps> = ({ open = true }) => {
           <CircleIcon sx={{ color: '#1e3a8a', fontSize: 30 }} />
         </Box>
         <Typography variant="h6" sx={{ fontWeight: 'bold' }}>
-          Circle
+          TSC
         </Typography>
       </Box>
 
